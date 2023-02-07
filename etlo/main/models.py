@@ -132,7 +132,7 @@ class CustomUser(AbstractUser):
     objects = CustomUserManager()
 
     def __str__(self):
-        return self.etlo_id
+        return str(self.phone_number) + ' - ' + str(self.email)
 
 
 class Address(SoftDeleteModel):
@@ -314,6 +314,14 @@ class TransactionType(SoftDeleteModel):
         'transaction-icon', 'transaction-icon'))
 
 
+class NotificationType(SoftDeleteModel):
+    code = models.IntegerField(null=True)
+    name = models.CharField(max_length=30)
+    color = models.CharField(max_length=6, null=True, blank=True)
+    icon = models.FileField(upload_to=PathRename(
+        'notification-icon', 'notification-icon'))
+
+
 class Transaction(SoftDeleteModel):
     user = models.ForeignKey(CustomUser, null=True, on_delete=models.CASCADE)
     currency = models.ForeignKey(Currency, on_delete=models.CASCADE)
@@ -474,7 +482,7 @@ class DepartmentBanner(SoftDeleteModel):
         img.thumbnail(size)
 
         thumb_io = BytesIO()
-        img.save(thumb_io, 'JPEG', quality=300)
+        img.save(thumb_io, 'PNG', quality=300)
 
         thumbnail = File(thumb_io, name=image.name)
 
@@ -550,7 +558,7 @@ class Banner(SoftDeleteModel):
         img.thumbnail(size)
 
         thumb_io = BytesIO()
-        img.save(thumb_io, 'JPEG', quality=300)
+        img.save(thumb_io, 'PNG', quality=300)
 
         thumbnail = File(thumb_io, name=image.name)
 

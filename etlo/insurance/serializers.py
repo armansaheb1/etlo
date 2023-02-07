@@ -25,6 +25,30 @@ class HealthInsuranceCompanySerializer(serializers.ModelSerializer):
 
 
 class HealthInsurancePriceListSerializer(serializers.ModelSerializer):
+
+    def to_representation(self, instance):
+        user = self.context['user']
+        validated_data = super().to_representation(instance)
+        if len(HealthInsuranceUserDiscount.objects.filter(user=user)):
+            dis = HealthInsuranceUserDiscount.objects.filter(
+                user=user).order_by('-last_modify_date').last()
+            validated_data['discount_percent'] = dis.percent
+        elif len(HealthInsuranceUserDiscount.objects.filter(user=None)):
+            dis = HealthInsuranceUserDiscount.objects.filter(
+                user=None).order_by('-last_modify_date').last()
+
+            validated_data['sum_price'] = validated_data['first_year'] + \
+                validated_data['second_year']
+            validated_data['discount_percent'] = dis.percent
+            validated_data['first_after_discount'] = validated_data['first_year'] - \
+                ((validated_data['first_year'] * dis.percent) / 100)
+            validated_data['second_after_discount'] = validated_data['second_year'] - \
+                ((validated_data['first_year'] * dis.percent) / 100)
+            validated_data['sum_after_discount'] = (validated_data['second_year'] + validated_data['first_year']) - \
+                (((validated_data['second_year'] +
+                 validated_data['first_year']) * dis.percent) / 100)
+        return validated_data
+
     class Meta:
         model = HealthInsurancePriceList
         fields = (
@@ -38,7 +62,9 @@ class HealthInsurancePriceListSerializer(serializers.ModelSerializer):
             "get_company_name",
             "get_company_image",
             "first_year",
-            "second_year"
+            "second_year",
+
+
         )
 
 
@@ -58,6 +84,29 @@ class HealthInsuranceUserDiscountSerializer(serializers.ModelSerializer):
 
 
 class HealthInsuranceRequestSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        user = self.context['user']
+        validated_data = super().to_representation(instance)
+        if len(HealthInsuranceUserDiscount.objects.filter(user=user)):
+            dis = HealthInsuranceUserDiscount.objects.filter(
+                user=user).order_by('-last_modify_date').last()
+            validated_data['discount_percent'] = dis.percent
+        elif len(HealthInsuranceUserDiscount.objects.filter(user=None)):
+            dis = HealthInsuranceUserDiscount.objects.filter(
+                user=None).order_by('-last_modify_date').last()
+
+            validated_data['sum_price'] = validated_data['first_year_price'] + \
+                validated_data['second_year_price']
+            validated_data['discount_percent'] = dis.percent
+            validated_data['first_after_discount'] = validated_data['first_year_price'] - \
+                ((validated_data['first_year_price'] * dis.percent) / 100)
+            validated_data['second_after_discount'] = validated_data['second_year_price'] - \
+                ((validated_data['first_year_price'] * dis.percent) / 100)
+            validated_data['sum_after_discount'] = (validated_data['second_year_price'] + validated_data['first_year_price']) - \
+                (((validated_data['second_year_price'] +
+                 validated_data['first_year_price']) * dis.percent) / 100)
+        return validated_data
+
     def create(self, validated_data):
         user = self.context['user']
         if len(HealthInsuranceUserDiscount.objects.filter(user=user)):
@@ -83,6 +132,7 @@ class HealthInsuranceRequestSerializer(serializers.ModelSerializer):
         return model
 
     class Meta:
+
         model = HealthInsuranceRequest
         fields = (
             "id",
@@ -110,12 +160,19 @@ class HealthInsuranceRequestSerializer(serializers.ModelSerializer):
             "phone_number",
             "email_address",
             "start_date",
+            "submit_date",
+            "end_date",
             "code",
             "status",
             "first_year_price",
             "second_year_price",
             "discount_percent",
+            "sum_price",
+            "sum_after_discount",
             "discount",
             "price",
-            "file"
+            "file",
+            "company",
+            "sum_price",
+            "sum_after_discount"
         )

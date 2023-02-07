@@ -12,6 +12,7 @@ from main.models import CustomUser, Country, State, City, DepartmentService
 from django.core.validators import MinValueValidator
 import os
 from django.utils.deconstruct import deconstructible
+from django.forms.models import model_to_dict
 
 
 def rand():
@@ -81,6 +82,9 @@ class HealthInsurancePriceList(SoftDeleteModel):
     def get_company_image(self):
         return self.company.get_image()
 
+    def sum_price(self):
+        return self.first_year + self.second_year
+
     class Meta:
         verbose_name_plural = 'Health Insurance Price List '
         verbose_name_plural = 'Health Insurance Price Lists '
@@ -116,9 +120,9 @@ class HealthInsuranceRequest(SoftDeleteModel):
     first_name = models.CharField(max_length=30)
     last_name = models.CharField(max_length=30)
     father_name = models.CharField(max_length=30)
-    description = models.CharField(max_length=300)
-    phone_number = models.CharField(max_length=30, null=True)
-    email_address = models.EmailField(null=True)
+    description = models.CharField(max_length=300, null=True, blank=True)
+    phone_number = models.CharField(max_length=30, null=True, blank=True)
+    email_address = models.EmailField(null=True, blank=True)
     insurance_number = models.CharField(max_length=20, null=True, blank=True)
     addressDesc = models.CharField(max_length=30)
     apartmentNo = models.CharField(max_length=30)
@@ -127,10 +131,10 @@ class HealthInsuranceRequest(SoftDeleteModel):
     district = models.CharField(max_length=30)
     gender = models.CharField(max_length=30)
     submit_date = models.DateField(null=True)
-    start_date = models.DateField()
+    start_date = models.DateField(null=True)
     end_date = models.DateField(null=True)
     code = models.IntegerField(validators=[MinValueValidator(1)], null=True)
-    status = models.IntegerField(validators=[MinValueValidator(1)], default=0)
+    status = models.IntegerField(default=0)
     payment_status = models.BooleanField(default=False)
     period = models.IntegerField(validators=[MinValueValidator(1)],)
     first_year_price = models.IntegerField(
@@ -154,6 +158,15 @@ class HealthInsuranceRequest(SoftDeleteModel):
             return price
         else:
             return 0
+
+    def sum_price(self):
+        return self.first_year_price + self.second_year_price
+
+    def sum_after_discount(self):
+        return self.first_year_price + self.second_year_price - ((self.first_year_price + self.second_year_price) * self.discount_percent / 100)
+
+    def company(self):
+        return {'name': self.insurance.company.name, 'image': self.insurance.company.image.url}
 
     def get_file(self):
         if not self.file:

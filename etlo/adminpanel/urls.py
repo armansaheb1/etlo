@@ -80,5 +80,7 @@ urlpatterns = [
     path('deposit_settings', views.DepositSetting.as_view()),
     path('transaction_type', views.TransactionTypes.as_view()),
     path('transaction_type/<id>', views.TransactionTypes.as_view()),
+    path('users', views.Users.as_view()),
+    path('users/<id>', views.User.as_view()),
 
 ]

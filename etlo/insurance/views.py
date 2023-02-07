@@ -21,13 +21,18 @@ def checkid(id):
 
 
 class HealthInsuranceDetails(APIView):
+    authentication_classes = [SessionAuthentication,
+                              BasicAuthentication, JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
     def post(self, request):
         checkid(request.data['id'])
         if not len(HealthInsuranceRequest.objects.filter(id=request.data['id'])):
             return Response({'data': 'Invalid ID'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
-        query = HealthInsuranceRequest.objects.filter(id=request.data['id'])
-        serializer = HealthInsuranceRequestSerializer(query, many=True)
+        query = HealthInsuranceRequest.objects.filter(
+            id=request.data['id']).first()
+        serializer = HealthInsuranceRequestSerializer(
+            query, context={'user': request.user})
         return Response(serializer.data)
 
 
@@ -40,8 +45,15 @@ class HealthInsurancePriceLists(APIView):
         query1 = HealthInsuranceCompany.objects.all()
         for item in query1:
             if len(HealthInsurancePriceList.objects.filter(company=item, start_age__lte=int(age), end_age__gte=int(age))):
+                if len(HealthInsuranceUserDiscount.objects.filter(user=request.user)):
+                    dis = HealthInsuranceUserDiscount.objects.filter(
+                        user=request.user).order_by('-last_modify_date').first()
+                    return Response(serializer.data, status=status.HTTP_200_OK)
+                elif len(HealthInsuranceUserDiscount.objects.filter(user=None)):
+                    dis = HealthInsuranceUserDiscount.objects.filter(
+                        user=None).order_by('-last_modify_date').first()
                 serializer.append({'company': HealthInsuranceCompanySerializer([item], many=True).data[0], 'pricelist': HealthInsurancePriceListSerializer(
-                    HealthInsurancePriceList.objects.filter(company=item, start_age__lte=int(age), end_age__gte=int(age)), many=True).data[0]})
+                    HealthInsurancePriceList.objects.filter(company=item, start_age__lte=int(age), end_age__gte=int(age)), many=True, context={'user': request.user}).data[0]})
         return Response({'age': age, 'data': tuple(serializer)})
 
 
@@ -110,7 +122,8 @@ class MyInsurances(APIView):
 
     def get(self, request):
         query = HealthInsuranceRequest.objects.filter(user=request.user.id)
-        serializer = HealthInsuranceRequestSerializer(query, many=True)
+        serializer = HealthInsuranceRequestSerializer(
+            query, many=True, context={'user': request.user})
         return Response(serializer.data)
 
 

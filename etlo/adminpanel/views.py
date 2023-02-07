@@ -24,6 +24,28 @@ def checkid(id):
         return Response({'data': 'ID Should Be a Number'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
 
+class Users(APIView):
+    authentication_classes = [SessionAuthentication,
+                              BasicAuthentication, JWTAuthentication]
+    permission_classes = [IsAdminUser]
+
+    def get(self, request):
+        query = CustomUser.objects.all()
+        serializer = CurrentUserSerializer(query, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class User(APIView):
+    authentication_classes = [SessionAuthentication,
+                              BasicAuthentication, JWTAuthentication]
+    permission_classes = [IsAdminUser]
+
+    def get(self, request, id):
+        query = CustomUser.objects.get(id=id)
+        serializer = CurrentUserSerializer(query)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+
 class SetAdmin(APIView):
     authentication_classes = [SessionAuthentication,
                               BasicAuthentication, JWTAuthentication]

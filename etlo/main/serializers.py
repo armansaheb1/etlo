@@ -11,6 +11,20 @@ def set_user(context, mainmodel, validated_data):
 
 
 class CurrentUserSerializer(serializers.ModelSerializer):
+    def to_representation(self, instance):
+        user = self.context['user']
+        validated_data = super().to_representation(instance)
+        if len(Wallet.objects.filter(user=user, Currency=Currency.objects.get(symbol='IRT'))):
+            balance = Wallet.objects.get(
+                user=user, Currency=Currency.objects.get(symbol='IRT')).balance
+            validated_data['balance'] = balance
+            validated_data['balance_icon'] = 'IRT'
+        else:
+            balance = 0
+            validated_data['balance'] = balance
+            validated_data['balance_icon'] = 'IRT'
+        return validated_data
+
     class Meta:
         model = CustomUser
         fields = (
@@ -189,7 +203,6 @@ class BannerSerializer(serializers.ModelSerializer):
             "last_modify_date",
             "last_modify_user",
             "name",
-            "department",
             "img",
             "get_small_image",
             "get_medium_image",
