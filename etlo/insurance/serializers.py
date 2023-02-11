@@ -24,7 +24,7 @@ class HealthInsuranceCompanySerializer(serializers.ModelSerializer):
         )
 
 
-class HealthInsurancePriceListSerializer(serializers.ModelSerializer):
+class HealthInsurancePriceListSerializer2(serializers.ModelSerializer):
 
     def to_representation(self, instance):
         user = self.context['user']
@@ -48,6 +48,27 @@ class HealthInsurancePriceListSerializer(serializers.ModelSerializer):
                 (((validated_data['second_year'] +
                  validated_data['first_year']) * dis.percent) / 100)
         return validated_data
+
+    class Meta:
+        model = HealthInsurancePriceList
+        fields = (
+            "id",
+            "company",
+            "start_age",
+            "end_age",
+            "add_date",
+            "last_modify_date",
+            "last_modify_user",
+            "get_company_name",
+            "get_company_image",
+            "first_year",
+            "second_year",
+
+
+        )
+
+
+class HealthInsurancePriceListSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = HealthInsurancePriceList

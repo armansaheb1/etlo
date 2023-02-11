@@ -148,6 +148,7 @@ class HealthInsuranceRequest(SoftDeleteModel):
     file = models.FileField(upload_to=PathRename(
         'files', 'files'), null=True, blank=True)
     date = models.DateTimeField(auto_now_add=True)
+    inid = models.IntegerField(null=True)
 
     def price(self):
         if self.period:

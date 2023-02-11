@@ -1,5 +1,5 @@
 from main.models import Country, DepartmentBanner, Currency, Department, DepartmentService, Wallet, CustomUser, Chat, Notification, Transaction, BankCard, BankSheba, Withdraw, Banner, MobileConfirmationCode, DepositSettings, TransactionType
-from main.serializers import CountrySerializer, DepartmentBannerSerializer,  CurrencySerializer, DepartmentSerializer, DepartmentServiceSerializer, WalletSerializer, ChatSerializer, BankCardSerializer, BankShebaSerializer, WithdrawSerializer, CurrentUserSerializer, BannerSerializer, LoginSerializer, TransactionSerializer, DepositSettingSerializer, TransactionTypeSerializer
+from main.serializers import CountrySerializer, DepartmentBannerSerializer,  CurrencySerializer, DepartmentSerializer, DepartmentServiceSerializer, WalletSerializer, ChatSerializer, BankCardSerializer, BankShebaSerializer, WithdrawSerializer, CurrentUserSerializer, BannerSerializer, LoginSerializer, TransactionSerializer, DepositSettingSerializer, TransactionTypeSerializer, CurrentUserSerializer2
 from insurance.models import HealthInsuranceCompany, HealthInsurancePriceList, HealthInsuranceUserDiscount, HealthInsuranceRequest
 from insurance.serializers import HealthInsurancePriceListSerializer, HealthInsuranceCompanySerializer, HealthInsuranceUserDiscountSerializer, HealthInsuranceRequestSerializer
 from foreignbuy.models import ForeignBuyCategory, ForeignBuyRequests, ForeignBuySites
@@ -31,7 +31,8 @@ class Users(APIView):
 
     def get(self, request):
         query = CustomUser.objects.all()
-        serializer = CurrentUserSerializer(query, many=True)
+        serializer = CurrentUserSerializer(
+            query, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 
@@ -42,7 +43,8 @@ class User(APIView):
 
     def get(self, request, id):
         query = CustomUser.objects.get(id=id)
-        serializer = CurrentUserSerializer(query)
+        serializer = CurrentUserSerializer2(
+            query, context={'user': request.user})
         return Response(serializer.data, status=status.HTTP_200_OK)
 
 

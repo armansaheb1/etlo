@@ -368,9 +368,13 @@ class Notification(models.Model):
         CustomUser, related_name='notification', on_delete=models.CASCADE)
     title = models.CharField(max_length=50)
     text = models.CharField(max_length=300)
-    icon = models.CharField(max_length=30)
     read = models.BooleanField(default=False)
     date = models.DateTimeField(auto_now=True, editable=True)
+    icon_id = models.ForeignKey(
+        NotificationType, on_delete=models.CASCADE, null=True, blank=True)
+
+    def icon(self):
+        return {'icon': self.icon_id.icon.url, 'color': self.icon_id.color}
 
 
 class Department(SoftDeleteModel):
@@ -380,8 +384,11 @@ class Department(SoftDeleteModel):
     last_modify_date = models.DateTimeField(auto_now=True, editable=True)
     name = models.CharField(max_length=50)
     details = models.CharField(max_length=200)
-    icon = models.CharField(max_length=30)
+    icon = models.FileField(upload_to=PathRename(
+        'department-icon', 'department-icon'), null=True)
     is_active = models.BooleanField(default=True)
+    color = models.CharField(max_length=6, null= True)
+    background_item = models.CharField(max_length=10, null= True)
 
     def __str__(self):
         return self.name
@@ -400,7 +407,8 @@ class DepartmentService(SoftDeleteModel):
         Department, related_name='services', on_delete=models.CASCADE)
     name = models.CharField(max_length=50)
     details = models.CharField(max_length=200)
-    icon = models.CharField(max_length=30)
+    icon = models.FileField(upload_to=PathRename(
+        'service-icon', 'service-icon'), null=True)
     is_active = models.BooleanField(default=True)
 
     def __str__(self):

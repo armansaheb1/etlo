@@ -8,7 +8,7 @@ import os
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 from .models import CustomUser, MobileConfirmationCode, EmailConfirmationCode, Notification, Country, State, City, Department, DepartmentBanner, DepartmentService, Address, Chat, BankCard, BankSheba, Withdraw, Wallet, Currency, Transaction, Banner, BankIcon
-from .serializers import CurrentUserSerializer, NotificationSerializer, CountrySerializer, StateSerializer, CitySerializer, DepartmentSerializer, DepartmentBannerSerializer, DepartmentServiceSerializer, AddressSerializer, ChatSerializer, BankCardSerializer, BankShebaSerializer, WithdrawSerializer, WalletSerializer, TransactionSerializer, BannerSerializer, CurrencySerializer, MobileConfirmationCodeSerializer, EmailConfirmationCodeSerializer, SetPhoneSerializer, SetPasswordSerializer, SetProfileSerializer, LoginSerializer, SetCurrentPasswordSerializer, CurrencyConvertSerializer, SetEmailSerializer, BankIconSerializer, DepositSettingSerializer
+from .serializers import CurrentUserSerializer, NotificationSerializer, CountrySerializer, StateSerializer, CitySerializer, DepartmentSerializer, DepartmentBannerSerializer, DepartmentServiceSerializer, AddressSerializer, ChatSerializer, BankCardSerializer, BankShebaSerializer, WithdrawSerializer, WalletSerializer, TransactionSerializer, BannerSerializer, CurrencySerializer, MobileConfirmationCodeSerializer, EmailConfirmationCodeSerializer, SetPhoneSerializer, SetPasswordSerializer, SetProfileSerializer, LoginSerializer, SetCurrentPasswordSerializer, CurrencyConvertSerializer, SetEmailSerializer, BankIconSerializer, DepositSettingSerializer, CurrentUserSerializer2
 from django.db.models import Q
 from django.contrib.auth.hashers import check_password, make_password
 from django.contrib.auth.password_validation import validate_password
@@ -213,7 +213,8 @@ class CurrentUser(APIView):
 
     def get(self, request, format=None):
         user = CustomUser.objects.filter(id=request.user.id).first()
-        serializer = CurrentUserSerializer(user)
+        serializer = CurrentUserSerializer2(
+            user, context={'user': request.user})
         return Response({'data': serializer.data}, status=status.HTTP_200_OK)
 
 
@@ -405,13 +406,9 @@ class Notifications(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, format=None):
-        query = Notification.objects.filter(id=request.user.id)
-        read = True
-        for item in query:
-            if not item.read:
-                read = False
+        query = Notification.objects.filter(user=request.user)
         serializer = NotificationSerializer(query, many=True)
-        return Response({'data': {'read': read, 'notifications': serializer.data}})
+        return Response({'data': {'read': True, 'notifications': serializer.data}})
 
 
 class Countries(APIView):

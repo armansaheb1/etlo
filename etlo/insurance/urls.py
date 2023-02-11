@@ -27,4 +27,5 @@ urlpatterns = [
     path('health_insurance_request', views.HealthInsuranceRequests.as_view()),
     path('my_insurances', views.MyInsurances.as_view()),
     path('check_discount', views.CheckDiscount.as_view()),
+    path('health_insurance_payment', views.HealthInsurancePayment.as_view()),
 ]

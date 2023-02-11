@@ -31,7 +31,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False
+DEBUG = True
 ROOT = '5.75.139.41:8000'
 ALLOWED_HOSTS = ['5.75.139.41', 'api.etlo.app']
 

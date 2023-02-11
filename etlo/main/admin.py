@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import CustomUser, MobileConfirmationCode, Notification, EmailConfirmationCode, Country, DepartmentService, DepartmentBanner, State, City, Department, Wallet, Currency, BankIcon, DepositSettings, Transaction, TransactionType
+from .models import CustomUser, MobileConfirmationCode, Notification, EmailConfirmationCode, Country, DepartmentService, DepartmentBanner, State, City, Department, Wallet, Currency, BankIcon, DepositSettings, Transaction, TransactionType, NotificationType
 
 
 class DateAdmin(admin.ModelAdmin):
@@ -23,3 +23,4 @@ admin.site.register(BankIcon)
 admin.site.register(DepositSettings)
 admin.site.register(Transaction)
 admin.site.register(TransactionType)
+admin.site.register(NotificationType)

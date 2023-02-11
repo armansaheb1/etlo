@@ -11,12 +11,39 @@ def set_user(context, mainmodel, validated_data):
 
 
 class CurrentUserSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CustomUser
+        fields = (
+            "id",
+            "phone_number",
+            "email",
+            "first_name",
+            "last_name",
+            "etlo_id",
+            "is_active",
+            "get_profile_image",
+            "get_id_image",
+            "is_admin",
+            "id_image",
+            "profile_image",
+            "email_verification",
+            "phone_verification",
+            "image_verification",
+            "id_verification_error",
+            "image_verification_error",
+            "id_verification",
+            "is_verified"
+        )
+
+
+class CurrentUserSerializer2(serializers.ModelSerializer):
     def to_representation(self, instance):
         user = self.context['user']
         validated_data = super().to_representation(instance)
-        if len(Wallet.objects.filter(user=user, Currency=Currency.objects.get(symbol='IRT'))):
+        if len(Wallet.objects.filter(user=user, currency=Currency.objects.get(symbol='IRT'))):
             balance = Wallet.objects.get(
-                user=user, Currency=Currency.objects.get(symbol='IRT')).balance
+                user=user, currency=Currency.objects.get(symbol='IRT')).balance
             validated_data['balance'] = balance
             validated_data['balance_icon'] = 'IRT'
         else:
@@ -134,9 +161,10 @@ class NotificationSerializer(serializers.ModelSerializer):
             "id",
             "title",
             "text",
-            "icon",
+            "icon_id",
             "read",
-            "date"
+            "date",
+            "icon"
         )
 
 
@@ -222,6 +250,8 @@ class DepartmentSerializer(serializers.ModelSerializer):
             "details",
             "icon",
             "is_active",
+            "color",
+            "background_item"
         )
 
 

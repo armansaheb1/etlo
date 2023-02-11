@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from .models import HealthInsuranceCompany, HealthInsurancePriceList, HealthInsuranceUserDiscount, HealthInsuranceRequest
-from .serializers import HealthInsurancePriceListSerializer, HealthInsuranceCompanySerializer, HealthInsuranceRequestSerializer, HealthInsuranceUserDiscountSerializer
+from .serializers import HealthInsurancePriceListSerializer, HealthInsuranceCompanySerializer, HealthInsuranceRequestSerializer, HealthInsuranceUserDiscountSerializer, HealthInsurancePriceListSerializer2
 from main.models import Wallet, Currency
 from datetime import datetime, timedelta
 from dateutil.relativedelta import relativedelta
@@ -52,7 +52,7 @@ class HealthInsurancePriceLists(APIView):
                 elif len(HealthInsuranceUserDiscount.objects.filter(user=None)):
                     dis = HealthInsuranceUserDiscount.objects.filter(
                         user=None).order_by('-last_modify_date').first()
-                serializer.append({'company': HealthInsuranceCompanySerializer([item], many=True).data[0], 'pricelist': HealthInsurancePriceListSerializer(
+                serializer.append({'company': HealthInsuranceCompanySerializer([item], many=True).data[0], 'pricelist': HealthInsurancePriceListSerializer2(
                     HealthInsurancePriceList.objects.filter(company=item, start_age__lte=int(age), end_age__gte=int(age)), many=True, context={'user': request.user}).data[0]})
         return Response({'age': age, 'data': tuple(serializer)})
 
@@ -137,16 +137,32 @@ class HealthInsurancePayment(APIView):
         if not len(HealthInsuranceRequest.objects.filter(id=request.data['id'])):
             return Response({'data': 'ID Not Found'}, status=status.HTTP_404_NOT_FOUND)
         req = HealthInsuranceRequest.objects.get(id=request.data['id'])
+        data = req
+        r = requests.post(
+            f'https://destek.mpsyazilim.com/veriEntegrasyonWS/VeriEntegrasyonWebServer.dll/kisiolustur?pasaportno={data.passport_number}&tckimlikno&ad={data.first_name}&soyad={data.last_name}&cinsiyet={data.gender.replace("male", "E").replace("female", "K")}&babaadi={data.father_name}&dogumtarihi={data.birthday_date}&uyrukid=3&ilkodu=06&ilcekodu=1130&mahalle=TEST MAH&cad=TEST CAD&binano=4&daireno=5', headers={'username': 'testbayi', 'password': 'pisgele'})
+        return Response(r)
+        return Response(r.json()['Result'][0]['kisiid:'])
         if req.period == 1:
             price = req.first_year
+        elif req.period == 2:
+            price = req.first_year + req.second_year
         else:
-            price = req.second_year
+            return Response({'data': 'Wrong Period'}, status=status.HTTP_404_NOT_FOUND)
+        if len(HealthInsuranceUserDiscount.objects.filter(user=request.user)):
+            dis = HealthInsuranceUserDiscount.objects.filter(
+                user=request.user).order_by('-last_modify_date').first()
+        elif len(HealthInsuranceUserDiscount.objects.filter(user=None)):
+            dis = HealthInsuranceUserDiscount.objects.filter(
+                user=None).order_by('-last_modify_date').first()
+        price = price - (price * dis.percent / 100)
         wallet = Wallet.objects.get(
             user=request.user, currency=Currency.objects.get(symbol='TRL').id)
         if wallet.balance >= price:
             wallet.balance = wallet.balance - price
             wallet.save()
             req.payment_status = True
+            req.status = 1
+            req.save()
         else:
             return Response({'data': 'Insufficient Balance'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
 
